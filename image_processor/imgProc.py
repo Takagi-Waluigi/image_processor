@@ -25,25 +25,12 @@ class ImageProcessor(Node):
         self.p_marker_radius = 0.0
 
     def timer_callback(self):     
-        '''
-
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
-
-       
-        '''
 
         self._, self.frame = self.cap.read()
         self.frame = cv2.resize(self.frame, (int(self.frame.shape[1]/2), int(self.frame.shape[0]/2)))
 
         self.res_orange = self.getMask([0,50,100], [25,255,255])
         self.contours_frame = self.getContours(self.res_orange, 50, 30)
-
-        # 再生
-        #cv2.imshow('video',self.contours_frame)
 
         msg = Imgproc()
 
@@ -60,10 +47,6 @@ class ImageProcessor(Node):
         self.publisher_.publish(msg)
         self.get_logger().info('Publishing: "%s"' % msg.radius)
         
-        
-
-
-
     def getMask(self, l, u):
         hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
 
@@ -87,22 +70,11 @@ class ImageProcessor(Node):
 
         contours, _= cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        # 一番大きい輪郭を抽出
-        #contours.sort(key=cv2.contourArea, reverse=True)
- 
-        #一つ以上検出
         if len(contours) > 0:
             for cnt in contours:
-                # 最小外接円を描く
                 (x,y), radius = cv2.minEnclosingCircle(cnt)
                 center = (int(x),int(y))
                 radius = int(radius)
-
-                
-                #print("x:", x)
-                #print("y:", y)
-                #print("rad:", radius)
-
                 radius_frame = cv2.circle(self.frame,center,0,(0,255,0),0)                
 
                 if radius > r:
@@ -111,18 +83,7 @@ class ImageProcessor(Node):
                     self.marker_x = x
                     self.marker_y = y
                     self.marker_radius = radius
-
-                    #print("radius:", radius)
-                
-                '''
-                else:
-                    self.marker_x = x
-                    self.marker_y = y
-                    self.marker_radius = 0.0
                     
-                '''
-                
-
             return radius_frame
         else:
             self.marker_radius = 0.0
